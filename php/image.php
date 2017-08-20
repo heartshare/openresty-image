@@ -1,6 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 
+
 use Intervention\Image\ImageManagerStatic as Image;
 
 $document_root = $_SERVER['SERVER_ROOT'];
@@ -78,6 +79,9 @@ $img = Image::make($source_image);
 // 建议放在首位，根据原图EXIF信息自动旋正，便于后续处理。
 $exif = $img->exif();
 
+
+list($width, $height, $type, $attr) = getimagesize($source_image);
+
 if (isset($exif['Orientation']) && $bool_params['auto-orient']) {
     switch ($exif['Orientation']) {
         case 6:
@@ -92,9 +96,11 @@ if (isset($exif['Orientation']) && $bool_params['auto-orient']) {
     }
 }
 
+if ($width > 850) {
+    $img->resize(850, null, function ($constraint) {
+        $constraint->aspectRatio();
+    });
+}
 
-$img->resize(850, null, function ($constraint) {
-    $constraint->aspectRatio();
-});
 $img->save($cache_file);
 echo $img->response();
