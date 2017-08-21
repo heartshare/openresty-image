@@ -21,20 +21,20 @@ $tmp_params = explode($image_separator, $uri)[1];
 
 // 定义允许的布尔型参数名
 $allow_bool_params = array(
-    'auto-orient',
-    'thumbnail',
+    'auto-orient',  // 角度纠正
+    'strip',
 );
 
 // 定义允许的mpa类型参数名
 $allow_map_params = array(
-    'strip',
+    'thumbnail',    // 缩略设置
     'gravity',
     'crop',
     'rotate',
     'format',
     'blur',
     'interlace',
-    'quality',
+    'quality',      // 质量设置
     'sharpen',
     'size-limit',
 );
@@ -46,7 +46,7 @@ $map_params = array();
 $bool_params = array();
 
 foreach ($params as $pk => $param) {
-    if (in_array($param, $allow_map_params)) {
+    if (in_array($param, $allow_map_params) && isset($params[$pk + 1])) {
         $map_params[$param] = urldecode($params[$pk + 1]);
     }
 
@@ -66,10 +66,14 @@ if (!is_dir(dirname($cache_file))) {
     mkdir(dirname($cache_file), 0755, true);
 }
 
+// 处理图片
 Image::configure(array('driver' => 'imagick'));
 $img = Image::make($source_image);
 
-// 建议放在首位，根据原图EXIF信息自动旋正，便于后续处理。
+$source_width = $img->width();
+$source_height = $img->height();
+
+// 优先处理角度纠正，根据原图EXIF信息自动旋正，便于后续处理。
 $exif = $img->exif();
 
 if (isset($exif['Orientation']) && $bool_params['auto-orient']) {
@@ -87,19 +91,43 @@ if (isset($exif['Orientation']) && $bool_params['auto-orient']) {
 }
 
 
-$width = $img->width();
+// 缩略处理
+if (isset($map_params['thumbnail']) && (strpos($map_params['thumbnail'], 'x') !== false)) {
 
-if ($width > 1000) {
-    $img->resize(1000, null, function ($constraint) {
-        $constraint->aspectRatio();
-    });
+    list($set_width, $set_height) = explode('x', $map_params['thumbnail']);
+
+    $width = $img->width();
+    $height = $img->height();
+
+    $set_width = intval($set_width);
+    $set_height = intval($set_height);
+
+    if ((strpos($set_width, '!') !== 0) && $width < $set_width) {
+        $set_width = $width;
+    }
+
+    if ((strpos($set_height, '!') !== 0) && $height < $set_height) {
+        $set_height = $height;
+    }
+
+    if ($set_width && $set_height) {
+        $img->resize($set_width, $set_height);
+    } elseif ($set_width && !$set_height) {
+        $img->resize($set_width, null, function ($constraint) {
+            $constraint->aspectRatio();
+        });
+    } elseif (!$set_width && $set_height) {
+        $img->resize(null, $set_height, function ($constraint) {
+            $constraint->aspectRatio();
+        });
+    }
 }
 
 // 增加水印支持
 $width = $img->width();
 $height = $img->height();
 
-$img->text('王玉鹏的官方网站：www.41ms.com', $width-10, $height-10, function($font) {
+$img->text('王玉鹏的官方网站：www.41ms.com', $width - 10, $height - 10, function ($font) {
     $font->file('msyh.ttf');
     $font->size(15);
     $font->color('#BEBEBE');
@@ -107,9 +135,15 @@ $img->text('王玉鹏的官方网站：www.41ms.com', $width-10, $height-10, fun
     $font->valign('bottom');
 });
 
-// 输出图片
-echo $img->response($ext);
 
-// 保存缓存图片
-$img->save($cache_file);
+// 图片质量设置
+$quality = 75;
+
+if (isset($map_params['quality']) && (intval($map_params['quality']) > 0)) {
+    $quality = intval($map_params['quality']);
+}
+
+echo $img->response($ext, $quality);
+
+$img->save($cache_file, $quality);
 $img->destroy();
