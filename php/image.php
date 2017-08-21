@@ -102,7 +102,7 @@ $height = $img->height();
 $img->text('王玉鹏的官方网站：www.41ms.com', $width-10, $height-10, function($font) {
     $font->file('msyh.ttf');
     $font->size(15);
-    $font->color('#FFFFFF');
+    $font->color('#BEBEBE');
     $font->align('right');
     $font->valign('bottom');
 });
