@@ -67,13 +67,20 @@ if (!is_dir(dirname($cache_file))) {
     mkdir(dirname($cache_file), 0755, true);
 }
 
+Image::configure(array('driver' => 'imagick'));
 $img = Image::make($source_image);
+
+$width = $img->width();
+
+if ($width > 850) {
+    $img->resize(850, null, function ($constraint) {
+        $constraint->aspectRatio();
+    });
+}
+
 
 // 建议放在首位，根据原图EXIF信息自动旋正，便于后续处理。
 $exif = $img->exif();
-
-
-list($width, $height, $type, $attr) = getimagesize($source_image);
 
 if (isset($exif['Orientation']) && $bool_params['auto-orient']) {
     switch ($exif['Orientation']) {
@@ -89,11 +96,21 @@ if (isset($exif['Orientation']) && $bool_params['auto-orient']) {
     }
 }
 
-if ($width > 850) {
-    $img->resize(850, null, function ($constraint) {
-        $constraint->aspectRatio();
-    });
-}
+// 增加水印支持
+$width = $img->width();
+$height = $img->height();
 
-$img->save($cache_file);
+$img->text('王玉鹏的官方网站：www.41ms.com', $width-10, $height-10, function($font) {
+    $font->file('msyh.ttf');
+    $font->size(15);
+    $font->color('#FFFFFF');
+    $font->align('right');
+    $font->valign('bottom');
+});
+
+
+// 输出图片
 echo $img->response();
+
+// 保存缓存图片
+$img->save($cache_file);
