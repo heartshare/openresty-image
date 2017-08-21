@@ -70,7 +70,7 @@ if (!is_dir(dirname($cache_file))) {
 Image::configure(array('driver' => 'imagick'));
 $img = Image::make($source_image);
 
-$width = $img->width();
+list($width, $height, $type, $attr) = getimagesize($source_image);
 
 if ($width > 850) {
     $img->resize(850, null, function ($constraint) {
