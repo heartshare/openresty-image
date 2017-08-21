@@ -11,13 +11,6 @@ $uri = $_SERVER['REQUEST_URI'];
 // 定义图片处理标识符
 $image_separator = '/image2/';
 
-// 如果没有处理需求，直接输出
-if (strpos($uri, $image_separator) == false) {
-    $source_image = $document_root . $uri;
-    $img = Image::make($source_image);
-    echo $img->response();
-}
-
 // 定义缓存路径
 $cache_dir = $document_root . DIRECTORY_SEPARATOR . 'cache';
 
