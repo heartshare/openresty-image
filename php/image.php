@@ -1,7 +1,6 @@
 <?php
 require 'vendor/autoload.php';
 
-
 use Intervention\Image\ImageManagerStatic as Image;
 
 $document_root = $_SERVER['SERVER_ROOT'];
@@ -70,15 +69,6 @@ if (!is_dir(dirname($cache_file))) {
 Image::configure(array('driver' => 'imagick'));
 $img = Image::make($source_image);
 
-list($width, $height, $type, $attr) = getimagesize($source_image);
-
-if ($width > 850) {
-    $img->resize(850, null, function ($constraint) {
-        $constraint->aspectRatio();
-    });
-}
-
-
 // 建议放在首位，根据原图EXIF信息自动旋正，便于后续处理。
 $exif = $img->exif();
 
@@ -96,6 +86,15 @@ if (isset($exif['Orientation']) && $bool_params['auto-orient']) {
     }
 }
 
+
+$width = $img->width();
+
+if ($width > 1000) {
+    $img->resize(1000, null, function ($constraint) {
+        $constraint->aspectRatio();
+    });
+}
+
 // 增加水印支持
 $width = $img->width();
 $height = $img->height();
@@ -108,9 +107,9 @@ $img->text('王玉鹏的官方网站：www.41ms.com', $width-10, $height-10, fun
     $font->valign('bottom');
 });
 
-
 // 输出图片
-echo $img->response();
+echo $img->response($ext);
 
 // 保存缓存图片
 $img->save($cache_file);
+$img->destroy();
