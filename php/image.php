@@ -22,21 +22,12 @@ $tmp_params = explode($image_separator, $uri)[1];
 // 定义允许的布尔型参数名
 $allow_bool_params = array(
     'auto-orient',  // 角度纠正
-    'strip',
 );
 
 // 定义允许的mpa类型参数名
 $allow_map_params = array(
     'thumbnail',    // 缩略设置
-    'gravity',
-    'crop',
-    'rotate',
-    'format',
-    'blur',
-    'interlace',
     'quality',      // 质量设置
-    'sharpen',
-    'size-limit',
 );
 
 // 检测存在的参数
