@@ -15,6 +15,7 @@ $source_image = $document_root . explode($image_separator, $uri)[0];
 
 if (!file_exists($source_image)) {
     echo 'file not found!';
+    exit();
 }
 
 // 定义缓存路径
@@ -52,6 +53,13 @@ foreach ($params as $pk => $param) {
         $bool_params[$param] = true;
     }
 }
+
+
+if (empty($map_params) && empty($bool_params)) {
+    echo 'file not found!';
+    exit();
+}
+
 
 // 缓存图片路径
 $ext = pathinfo($source_image)['extension'];
