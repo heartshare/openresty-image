@@ -10,6 +10,13 @@ $uri = $_SERVER['REQUEST_URI'];
 // 定义图片处理标识符
 $image_separator = '/image2/';
 
+// 获取源图片路径
+$source_image = $document_root . explode($image_separator, $uri)[0];
+
+if (!file_exists($source_image)) {
+    echo 'file not found!';
+}
+
 // 定义缓存路径
 $cache_dir = $document_root . DIRECTORY_SEPARATOR . 'cache';
 
@@ -45,9 +52,6 @@ foreach ($params as $pk => $param) {
         $bool_params[$param] = true;
     }
 }
-
-// 获取源图片路径
-$source_image = $document_root . explode($image_separator, $uri)[0];
 
 // 缓存图片路径
 $ext = pathinfo($source_image)['extension'];
