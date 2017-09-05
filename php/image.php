@@ -70,14 +70,17 @@ if (!is_dir(dirname($cache_file))) {
     mkdir(dirname($cache_file), 0755, true);
 }
 
+// 处理图片
+Image::configure(array('driver' => 'imagick'));
+$img = Image::make($source_image);
+
 if ($ext == 'gif') {
+    echo $img->response($ext);
+    $img->destroy();
     copy($source_image, $cache_file);
     exit();
 }
 
-// 处理图片
-Image::configure(array('driver' => 'imagick'));
-$img = Image::make($source_image);
 
 $source_width = $img->width();
 $source_height = $img->height();
