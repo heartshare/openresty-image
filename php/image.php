@@ -74,14 +74,6 @@ if (!is_dir(dirname($cache_file))) {
 Image::configure(array('driver' => 'imagick'));
 $img = Image::make($source_image);
 
-if ($ext == 'gif') {
-    echo $img->response($ext);
-    $img->destroy();
-    copy($source_image, $cache_file);
-    exit();
-}
-
-
 $source_width = $img->width();
 $source_height = $img->height();
 
