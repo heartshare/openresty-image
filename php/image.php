@@ -63,10 +63,16 @@ if (empty($map_params) && empty($bool_params)) {
 
 // 缓存图片路径
 $ext = pathinfo($source_image)['extension'];
+
 $cache_file = $cache_dir . DIRECTORY_SEPARATOR . md5($uri) . '.' . $ext;
 
 if (!is_dir(dirname($cache_file))) {
     mkdir(dirname($cache_file), 0755, true);
+}
+
+if ($ext == 'gif') {
+    copy($source_image, $cache_file);
+    exit();
 }
 
 // 处理图片
